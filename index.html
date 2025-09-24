@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Map Sharing Site</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to any CSS file if needed -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
@@ -13,12 +13,141 @@
     </header>
     <main>
         <section>
-            <h2>View the Map</h2>
-            <iframe src="map.html" width="100%" height="600px" style="border: none;"></iframe>
+            <h2>🗺️ View the Map</h2>
+            <div class="map-container">
+                <iframe src="map.html" title="SWOT Gauges Map"></iframe>
+            </div>
+            
+            <div class="share-section">
+                <h3>📤 Share This Map</h3>
+                <p>Copy the URL below to share this map with others:</p>
+                <input type="text" class="share-url" id="shareUrl" readonly value="">
+                <div style="margin-top: 1rem;">
+                    <button class="btn" onclick="copyToClipboard()">📋 Copy URL</button>
+                    <button class="btn btn-secondary" onclick="shareViaEmail()">📧 Share via Email</button>
+                    <button class="btn btn-secondary" onclick="openMapDirect()">🔗 Open Direct Link</button>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #64748b;">
+                    <strong>Tip:</strong> The direct link opens the map in full-screen mode, perfect for sharing with external users.
+                </p>
+            </div>
+        </section>
+        
+        <section style="margin-top: 2rem;">
+            <h2>📊 Map Information</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                    <h3 style="color: #1e40af; margin-bottom: 0.5rem;">🌍 Coverage Area</h3>
+                    <p style="color: #64748b; margin: 0;">South America - Peru, Argentina, Colombia, Brazil</p>
+                </div>
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <h3 style="color: #047857; margin-bottom: 0.5rem;">📡 Data Sources</h3>
+                    <p style="color: #64748b; margin: 0;">SWOT satellite data + Ground monitoring stations</p>
+                </div>
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <h3 style="color: #d97706; margin-bottom: 0.5rem;">🔄 Updates</h3>
+                    <p style="color: #64748b; margin: 0;">Real-time hydrological gauge data</p>
+                </div>
+            </div>
         </section>
     </main>
     <footer>
         <p>&copy; 2023 Map Sharing Site. All rights reserved.</p>
     </footer>
+
+    <script>
+        // Set the share URL when page loads
+        window.addEventListener('load', function() {
+            const baseUrl = window.location.href.replace('/index.html', '').replace(/\/$/, '');
+            const mapUrl = baseUrl + '/map.html';
+            document.getElementById('shareUrl').value = mapUrl;
+        });
+
+        function copyToClipboard() {
+            const shareUrl = document.getElementById('shareUrl');
+            shareUrl.select();
+            shareUrl.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                navigator.clipboard.writeText(shareUrl.value).then(function() {
+                    showNotification('✅ URL copied to clipboard!');
+                }).catch(function() {
+                    // Fallback for older browsers
+                    document.execCommand('copy');
+                    showNotification('✅ URL copied to clipboard!');
+                });
+            } catch (err) {
+                showNotification('❌ Failed to copy URL. Please copy manually.');
+            }
+        }
+
+        function shareViaEmail() {
+            const mapUrl = document.getElementById('shareUrl').value;
+            const subject = encodeURIComponent('SWOT Gauges Map - Shared with you');
+            const body = encodeURIComponent(`Hi,
+
+I wanted to share this interactive map with you:
+
+${mapUrl}
+
+This map shows hydrological gauges and SWOT satellite data across South America, including monitoring stations in Peru, Argentina, Colombia, and Brazil.
+
+Best regards`);
+            
+            window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        }
+
+        function openMapDirect() {
+            const mapUrl = document.getElementById('shareUrl').value;
+            window.open(mapUrl, '_blank');
+        }
+
+        function showNotification(message) {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            // Add CSS animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            document.body.appendChild(notification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                notification.remove();
+                style.remove();
+            }, 3000);
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'c' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+                e.preventDefault();
+                copyToClipboard();
+            }
+        });
+
+        console.log('Map Sharing Site loaded');
+        console.log('Keyboard shortcut: Ctrl+Shift+C (or Cmd+Shift+C) to copy share URL');
+    </script>
 </body>
 </html>
